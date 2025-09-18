@@ -40,7 +40,7 @@ const VotePage = () => {
 			const { data: voteCounts } = await supabase
 				.from("votes")
 				.select("work_id")
-				.then(async (result) => {
+				.then(async (result: { data: { work_id: string }[] | null; error: any }) => {
 					if (result.error) return { data: {} };
 					// Count votes per work
 					const counts: Record<string, number> = {};
