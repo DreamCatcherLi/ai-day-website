@@ -32,17 +32,30 @@ const VotePage = () => {
 			const { data: { user } } = await supabase.auth.getUser();
 			if (!user) { setError("请先登录"); setLoading(false); return; }
 
-			// load works with votes count via view if exists, fallback to base table
-			let worksData;
-			const { data: initialData, error: worksErr } = await supabase.from("works_with_votes").select("*").order("created_at", { ascending: false });
-			if (worksErr) {
-				const alt = await supabase.from("works").select("*").order("created_at", { ascending: false });
-				if (alt.error) throw alt.error;
-				worksData = (alt.data || []).map((w: Record<string, unknown>) => ({ ...w, votes_count: undefined }));
-			} else {
-				worksData = initialData;
-			}
-			setWorks((worksData || []) as WorkItem[]);
+			// load works from base table (works_with_votes view may not exist in production)
+			const { data: worksData, error: worksErr } = await supabase.from("works").select("*").order("created_at", { ascending: false });
+			if (worksErr) throw worksErr;
+			
+			// Get vote counts separately
+			const { data: voteCounts } = await supabase
+				.from("votes")
+				.select("work_id")
+				.then(async (result) => {
+					if (result.error) return { data: [] };
+					// Count votes per work
+					const counts: Record<string, number> = {};
+					result.data?.forEach((vote: any) => {
+						counts[vote.work_id] = (counts[vote.work_id] || 0) + 1;
+					});
+					return { data: counts };
+				});
+			
+			// Combine works with vote counts
+			const worksWithVotes = (worksData || []).map((work: any) => ({
+				...work,
+				votes_count: voteCounts?.[work.id] || 0
+			}));
+			setWorks(worksWithVotes as WorkItem[]);
 
 			const { data: votesData, error: votesErr } = await supabase
 				.from("votes")
