@@ -33,11 +33,14 @@ const VotePage = () => {
 			if (!user) { setError("请先登录"); setLoading(false); return; }
 
 			// load works with votes count via view if exists, fallback to base table
-			let { data: worksData, error: worksErr } = await supabase.from("works_with_votes").select("*").order("created_at", { ascending: false });
+			let worksData;
+			const { data: initialData, error: worksErr } = await supabase.from("works_with_votes").select("*").order("created_at", { ascending: false });
 			if (worksErr) {
 				const alt = await supabase.from("works").select("*").order("created_at", { ascending: false });
 				if (alt.error) throw alt.error;
 				worksData = (alt.data || []).map((w: Record<string, unknown>) => ({ ...w, votes_count: undefined }));
+			} else {
+				worksData = initialData;
 			}
 			setWorks((worksData || []) as WorkItem[]);
 
