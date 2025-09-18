@@ -41,19 +41,19 @@ const VotePage = () => {
 				.from("votes")
 				.select("work_id")
 				.then(async (result) => {
-					if (result.error) return { data: [] };
+					if (result.error) return { data: {} };
 					// Count votes per work
 					const counts: Record<string, number> = {};
-					result.data?.forEach((vote: any) => {
+					result.data?.forEach((vote: { work_id: string }) => {
 						counts[vote.work_id] = (counts[vote.work_id] || 0) + 1;
 					});
 					return { data: counts };
 				});
 			
 			// Combine works with vote counts
-			const worksWithVotes = (worksData || []).map((work: any) => ({
+			const worksWithVotes = (worksData || []).map((work: Record<string, unknown>) => ({
 				...work,
-				votes_count: voteCounts?.[work.id] || 0
+				votes_count: voteCounts?.[work.id as string] || 0
 			}));
 			setWorks(worksWithVotes as WorkItem[]);
 
