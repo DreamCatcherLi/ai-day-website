@@ -24,9 +24,9 @@ const LoginPage = () => {
 				console.error('OAuth error:', error);
 				alert(`登录失败: ${error.message}`);
 			}
-		} catch (err: any) {
+		} catch (err: unknown) {
 			console.error('Sign in error:', err);
-			alert(`登录出错: ${err.message}`);
+			alert(`登录出错: ${err instanceof Error ? err.message : '未知错误'}`);
 		} finally {
 			setLoading(false);
 		}

@@ -37,7 +37,7 @@ const VotePage = () => {
 			if (worksErr) {
 				const alt = await supabase.from("works").select("*").order("created_at", { ascending: false });
 				if (alt.error) throw alt.error;
-				worksData = (alt.data || []).map((w: any) => ({ ...w, votes_count: undefined }));
+				worksData = (alt.data || []).map((w: Record<string, unknown>) => ({ ...w, votes_count: undefined }));
 			}
 			setWorks((worksData || []) as WorkItem[]);
 
@@ -47,8 +47,8 @@ const VotePage = () => {
 				.eq("voter_auth_user_id", user.id);
 			if (votesErr) throw votesErr;
 			setMyVotes((votesData || []) as VoteRecord[]);
-		} catch (e: any) {
-			setError(e?.message ?? "加载失败");
+		} catch (e: unknown) {
+			setError(e instanceof Error ? e.message : "加载失败");
 		} finally {
 			setLoading(false);
 		}
@@ -73,8 +73,8 @@ const VotePage = () => {
 			// optimistic update
 			setMyVotes((prev) => [...prev, { work_id: workId }]);
 			setWorks((prev) => prev.map((w) => w.id === workId ? { ...w, votes_count: (w.votes_count ?? 0) + 1 } : w));
-		} catch (e: any) {
-			setError(e?.message ?? "投票失败");
+		} catch (e: unknown) {
+			setError(e instanceof Error ? e.message : "投票失败");
 		} finally {
 			setVoting(null);
 		}

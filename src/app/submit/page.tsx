@@ -72,9 +72,9 @@ const SubmitPage = () => {
 				console.log('Hiding success message');
 				setShowSuccess(false);
 			}, 3000);
-		} catch (err: any) {
+		} catch (err: unknown) {
 			console.error('Submit error:', err);
-			setError(`提交失败：${err?.message ?? "请稍后重试"}`);
+			setError(`提交失败：${err instanceof Error ? err.message : "请稍后重试"}`);
 		} finally {
 			setSubmitting(false);
 		}
@@ -140,7 +140,7 @@ const SubmitPage = () => {
 							<strong>✅ {success}</strong>
 						</p>
 						<p className="text-xs text-green-600 mt-1">
-							现在可以去"我要投票页"查看你的作品了！
+							现在可以去&ldquo;我要投票页&rdquo;查看你的作品了！
 						</p>
 					</div>
 				)}
